@@ -1,0 +1,49 @@
+version: '3.4'
+      
+services:
+
+  pgsql.database:
+    container_name: pgsql.database
+    image: postgres:latest
+    ports:
+      - 5433:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=a!Bxg6ysb7S!;
+    command:
+      - "postgres"
+      - "-c"
+      - "max_locks_per_transaction=1500"
+      - "-c"
+      - "max_connections=500"
+    volumes:
+      - pgsql.database.latest:/var/lib/postgresql/data
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf
+      
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin:/root/.pgadmin
+  
+  school.service:
+    image: school.service
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    environment:
+      TZ: America/Sao_Paulo
+      ASPNETCORE_ENVIRONMENT: Production
+    ports:
+      - 5055:5055
+    depends_on:
+      - pgsql.database
+            
+volumes:
+  pgsql.database.latest:
+  pgadmin:
